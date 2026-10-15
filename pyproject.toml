@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thermonest"
+version = "0.2.0"
+description = "Your home's climate, at a glance."
+requires-python = ">=3.11,<3.14"
+dependencies = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "bleak>=1,<4", "sqlalchemy>=2,<3", "pydantic>=2,<3", "pywebview>=5,<7", "keyring>=25,<26", "cryptography>=44", "Pillow>=12,<13"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.25", "httpx>=0.28", "pyinstaller>=6", "ruff>=0.11"]
+
+[project.scripts]
+thermonest = "app.desktop.launcher:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
