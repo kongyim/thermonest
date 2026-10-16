@@ -305,9 +305,9 @@ export default function FloorPlanView({
   const selectedSensor = sensors.find((s) => s.id === selected);
   const selectedPosition = placements.find((p) => p.sensor_id === selected);
   const line =
-    points.length === 2
+    points.length
       ? points
-      : mode === "view" && plan?.calibration
+      : mode === "calibrate" && plan?.calibration
         ? [plan.calibration.a, plan.calibration.b]
         : [];
   const measured =
@@ -536,7 +536,7 @@ export default function FloorPlanView({
                         y1={line[0].y * plan.height}
                         x2={line[1].x * plan.width}
                         y2={line[1].y * plan.height}
-                        stroke={mode === "view" ? "#6d8074" : "#344bce"}
+                        stroke="#344bce"
                         strokeWidth="2"
                         vectorEffect="non-scaling-stroke"
                         strokeDasharray="6 4"
@@ -544,7 +544,7 @@ export default function FloorPlanView({
                     )}
                     {(points.length
                       ? points
-                      : mode === "view" && plan.calibration
+                      : mode === "calibrate" && plan.calibration
                         ? line
                         : []
                     ).map((p, i) => (
