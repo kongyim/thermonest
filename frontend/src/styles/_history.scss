@@ -162,3 +162,20 @@
     font-size: 11px;
   }
 }
+
+.history-tooltip {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 12px;
+
+  &-sample {
+    margin-top: 8px;
+
+    small {
+      display: block;
+      color: var(--muted);
+    }
+  }
+}

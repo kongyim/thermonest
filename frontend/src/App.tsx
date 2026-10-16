@@ -44,6 +44,7 @@ import {
   Wind,
   X,
 } from "lucide-react";
+import { nearestReading } from "./history";
 import FloorPlanView from "./components/FloorPlanView";
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
@@ -172,7 +173,7 @@ function App() {
       sensor,
       name: sensor.room_name ? `${sensor.room_name} · ${sensor.display_name}` : sensor.display_name,
       color: `hsl(${(items.findIndex((item) => item.id === sensor.id) * 137.508 + 150) % 360}, 48%, 46%)`,
-      data: (query.data ?? []).map((reading) => ({ ...reading, time: Date.parse(reading.timestamp) })),
+      data: (query.data ?? []).map((reading) => ({ ...reading, time: Date.parse(reading.timestamp), [`value_${sensor.id}`]: reading[metric] })),
       error: query.error,
       loading: query.isFetching,
     };
@@ -736,16 +737,34 @@ function App() {
                             tickFormatter={(v) => number(v, 1)}
                           />
                           <Tooltip
-                            labelFormatter={(v) => new Date(v).toLocaleString()}
-                            formatter={(v: number, name) => [
-                              `${number(v)}${metric === "temperature_c" ? " °C" : "%"}`,
-                              name,
-                            ]}
-                            contentStyle={{
-                              background: "var(--card)",
-                              border: "1px solid var(--line)",
-                              borderRadius: 10,
-                              fontSize: 12,
+                            content={({ active: hovering, label }) => {
+                              if (!hovering || label == null) return null;
+                              const timestamp = Number(label);
+                              // Match within one polling interval or aggregation bucket.
+                              const tolerance = Math.max(
+                                (settings.data?.sampling_seconds ?? 300) * 1000,
+                                Math.ceil((Date.parse(end) - Date.parse(start)) / 800),
+                                60000,
+                              );
+                              return (
+                                <div className="history-tooltip">
+                                  <div>{new Date(timestamp).toLocaleString()}</div>
+                                  {chartSeries.map((series) => {
+                                    const reading = nearestReading(series.data, timestamp, tolerance);
+                                    const value = reading?.[metric];
+                                    return (
+                                      <div className="history-tooltip-sample" key={series.sensor.id} style={{ color: series.color }}>
+                                        {series.name}: {value == null ? "No nearby reading" : `${number(value)}${metric === "temperature_c" ? " °C" : "%"}`}
+                                        {reading && (
+                                          <small>
+                                            Sample: {new Date(reading.timestamp).toLocaleString()}
+                                          </small>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
                             }}
                           />
                           <Legend />
@@ -754,7 +773,7 @@ function App() {
                               name={series.name}
                               data={series.data}
                               type="linear"
-                              dataKey={metric}
+                              dataKey={`value_${series.sensor.id}`}
                               stroke={series.color}
                               strokeWidth={2.5}
                               dot={series.data.length === 1}
