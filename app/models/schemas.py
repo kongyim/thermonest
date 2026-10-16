@@ -42,6 +42,7 @@ class RoomInput(BaseModel):
 
 class SettingsPatch(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    battery_mode: str | None = Field(default=None, pattern="^(passive|balanced|custom)$")
     sampling_seconds: int | None = Field(default=None, ge=30, le=3600)
     theme: str | None = Field(default=None, pattern="^(system|light|dark)$")
 

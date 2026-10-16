@@ -44,6 +44,7 @@ export interface Candidate {
   encrypted: boolean;
 }
 export interface Settings {
+  battery_mode: "passive" | "balanced" | "custom";
   sampling_seconds: number;
   theme: "system" | "light" | "dark";
   mock: boolean;

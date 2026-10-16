@@ -206,7 +206,12 @@ def create_app(data_dir: Path, *, mock=False, token=None, origin="http://127.0.0
 
     @app.patch("/api/settings")
     async def set_settings(data: SettingsPatch):
-        await manager.call(db.set_settings, data.model_dump(exclude_none=True))
+        values = data.model_dump(exclude_none=True)
+        if values.get("battery_mode") == "balanced":
+            values["sampling_seconds"] = 300
+        elif "sampling_seconds" in values and "battery_mode" not in values:
+            values["battery_mode"] = "custom"
+        await manager.call(db.set_settings, values)
         return await settings()
 
     @app.get("/api/dashboard/summary")

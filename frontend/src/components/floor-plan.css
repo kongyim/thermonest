@@ -136,8 +136,9 @@
 }
 .map-pin {
   position: absolute;
-  transform: translate(-13.5px, -50%);
+  transform: translate(-50%, -13.5px);
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 5px;
   z-index: 2;
@@ -145,7 +146,7 @@
   touch-action: none;
   cursor: grab;
   line-height: 1.2;
-  text-align: left;
+  text-align: center;
   filter: drop-shadow(0 2px 4px #0002);
 }
 .map-pin:active {

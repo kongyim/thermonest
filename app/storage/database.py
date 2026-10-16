@@ -64,8 +64,8 @@ class Database:
 
     def sensors(self):
         return self.rows("""SELECT s.*, r.name AS room_name,
-            (SELECT temperature_c FROM readings WHERE sensor_id=s.id ORDER BY timestamp DESC LIMIT 1) AS temperature_c,
-            (SELECT humidity_percent FROM readings WHERE sensor_id=s.id ORDER BY timestamp DESC LIMIT 1) AS humidity_percent
+            (SELECT temperature_c FROM readings WHERE sensor_id=s.id AND temperature_c IS NOT NULL ORDER BY timestamp DESC LIMIT 1) AS temperature_c,
+            (SELECT humidity_percent FROM readings WHERE sensor_id=s.id AND humidity_percent IS NOT NULL ORDER BY timestamp DESC LIMIT 1) AS humidity_percent
             FROM sensors s LEFT JOIN rooms r ON s.room_id=r.id ORDER BY r.sort_order, s.created_at""")
 
     def sensor(self, sensor_id):
@@ -124,11 +124,16 @@ class Database:
         return room
 
     def settings(self):
-        return {
-            "sampling_seconds": 120,
+        settings = {
+            "sampling_seconds": 300,
+            "battery_mode": "balanced",
             "theme": "system",
             **{r["key"]: json.loads(r["value"]) for r in self.rows("SELECT * FROM settings")},
         }
+
+        if settings["battery_mode"] == "balanced":
+            settings["sampling_seconds"] = 300
+        return settings
 
     def set_settings(self, values):
         with self.engine.begin() as c:

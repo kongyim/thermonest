@@ -33,6 +33,28 @@ import { Button } from "./ui/button";
 import { Dialog } from "./ui/dialog";
 import "./floor-plan.css";
 
+// Display preferences belong to this browser, independently of sensor polling.
+function useMapPreference<T>(key: string, fallback: T, valid: (value: unknown) => boolean) {
+  const storageKey = `thermonest.floor-plan.${key}`;
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(storageKey) ?? "null");
+      return valid(saved) ? saved as T : fallback;
+    } catch {
+      return fallback;
+    }
+  });
+  function save(next: T) {
+    setValue(next);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      // The controls still work when browser storage is unavailable.
+    }
+  }
+  return [value, save] as const;
+}
+
 type Mode = "view" | "calibrate" | "measure" | "place";
 export default function FloorPlanView({
   sensors,
@@ -55,12 +77,14 @@ export default function FloorPlanView({
   const [mode, setMode] = useState<Mode>("view");
   const [points, setPoints] = useState<Point[]>([]);
   const [knownLength, setKnownLength] = useState("");
-  const [unit, setUnit] = useState<"m" | "ft">("m");
+  const [unit, setUnit] = useMapPreference<"m" | "ft">("unit", "m", (v) => v === "m" || v === "ft");
   const [selected, setSelected] = useState("");
   const [zoom, setZoom] = useState(1);
-  const [heat, setHeat] = useState(true);
-  const [opacity, setOpacity] = useState(0.48);
-  const [radius, setRadius] = useState(5);
+  const [heat, setHeat] = useMapPreference("heat", true, (v) => typeof v === "boolean");
+  const [opacity, setOpacity] = useMapPreference("opacity", 0.48,
+    (v) => typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 0.8);
+  const [radius, setRadius] = useMapPreference("radius", 5,
+    (v) => typeof v === "number" && Number.isFinite(v) && v >= 1 && v <= 20);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [pendingImage, setPendingImage] = useState<File | null>(null);

@@ -53,3 +53,42 @@ async def test_scheduler_limits_connections_and_cancels(tmp_path):
     assert all(t.done() for t in manager.tasks.values())
     assert len(db.rows("SELECT * FROM readings")) == 3
     db.engine.dispose()
+
+
+async def test_passive_and_fresh_advertisements_never_connect(tmp_path):
+    import time
+
+    for mode in ("passive", "balanced", "custom"):
+        db = Database(tmp_path / f"{mode}.sqlite3")
+        sensor = db.add_sensor({"display_name": "Test", "room_id": None, "device_identifier": "test"})
+        db.set_settings({"battery_mode": mode})
+        provider = SimpleNamespace(mock=False, read=AsyncMock())
+        manager = SensorManager(db, provider)
+        if mode != "passive":
+            manager.passive_fields[sensor["id"]] = dict.fromkeys(
+                ("temperature_c", "humidity_percent"), time.monotonic())
+        manager.running = True
+        task = asyncio.create_task(manager.worker(sensor["id"]))
+        await asyncio.sleep(0.05)
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+        provider.read.assert_not_called()
+        db.engine.dispose()
+
+
+async def test_failed_connection_backs_off_from_poll_interval(tmp_path, monkeypatch):
+    db = Database(tmp_path / "backoff.sqlite3")
+    sensor = db.add_sensor({"display_name": "Test", "room_id": None, "device_identifier": "test"})
+    provider = SimpleNamespace(mock=True, read=AsyncMock(side_effect=TimeoutError))
+    manager = SensorManager(db, provider)
+    manager.running = True
+    clock = [10000.0]
+    monkeypatch.setattr("app.services.manager.time.monotonic", lambda: clock[0])
+    async def advance(delay):
+        clock[0] += delay
+        if clock[0] >= 10600:
+            manager.running = False
+    monkeypatch.setattr("app.services.manager.asyncio.sleep", advance)
+    await manager.worker(sensor["id"])
+    assert provider.read.await_count == 1
+    db.engine.dispose()

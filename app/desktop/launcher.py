@@ -25,6 +25,9 @@ class EventFormatter(logging.Formatter):
                 "event": record.getMessage(),
                 "sensor_id": getattr(record, "sensor_id", None),
                 "state": getattr(record, "state", None),
+                "timestamp": self.formatTime(record),
+                **{key: getattr(record, key) for key in
+                   ("connection_count", "duration_seconds", "interval_seconds") if hasattr(record, key)},
             }
         )
 

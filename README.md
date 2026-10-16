@@ -18,16 +18,21 @@ Validated with Python 3.12.9 on macOS arm64; Python 3.11–3.13 is permitted by 
 python3.12 -m venv .venv
 .venv/bin/pip install -r requirements-lock.txt
 .venv/bin/pip install -e '.[dev]'
-cd frontend
-npm ci
-npm run build
-cd ..
-.venv/bin/python -m app.desktop.launcher
+npm --prefix frontend ci
 ```
 
-Use `--mock` for a clearly labelled demo workspace with five discoverable simulated sensors and a separate `demo.sqlite3`. Demo mode starts empty so onboarding can be tested. Add sensors through the same workflow as real devices. Use `--browser` to open the production UI in your browser. `--data-dir PATH` selects an isolated development data directory. Do not expose the service through a network proxy.
+From the repository root, run these in separate terminals:
 
-The native launcher reserves an available loopback port before starting the server. Frontend and API share the same origin; a standalone Vite development server is intentionally not trusted by the API. Rebuild the frontend and reload the local UI when developing.
+```sh
+npm run dev:api
+npm run dev:web
+```
+
+Open the one-use URL printed by the API terminal after Vite starts. Vite provides hot frontend updates at `http://127.0.0.1:5173` and proxies API/bootstrap/WebSocket traffic to port 8765 with session and origin checks intact. Restart the API after Python changes and open its new session URL. Development defaults to demo sensors and isolated `.dev-data/` storage; use `npm run dev:api -- --real` for Bluetooth hardware.
+
+Battery Saver offers **Passive** (advertisements only, no GATT), **Balanced** (advertisements preferred, 300-second GATT fallback), and **Custom** (30–3600 seconds). Discovery listens for eight seconds at startup and roughly every minute while sensors are registered; it never connects. Fresh decoded temperature and humidity advertisements suppress GATT. Encrypted broadcasts require a bind key. On macOS, Bleak cannot request true radio-level passive scanning; Passive means connection-free advertisement monitoring using system-managed scanning ([Bleak documentation](https://bleak.readthedocs.io/en/latest/api/scanner.html)).
+
+GATT disconnects after a sample. Failures exponentially increase the polling delay (up to 24 hours, with jitter). Cached readings and timestamps survive restart; refreshing the dashboard never polls hardware. Logs report GATT attempt count, start-to-disconnect duration (including failed attempts), and time between attempts. Firmware and advertising intervals are never changed. Actual battery savings require physical sensor measurements.
 
 ## Features
 
@@ -65,7 +70,9 @@ See [BLE research and limits](docs/ble-research.md) and [macOS release checks](d
 ## Package
 
 ```sh
-./scripts/build-macos.sh
+npm run build:macos
+# Alias:
+npm run build
 ```
 
 The PyInstaller spec includes Cocoa/WebKit, CoreBluetooth, the Keychain backend, and the compiled UI. Native Bluetooth permission usage strings are embedded in Info.plist. The Python and npm dependency locks are included. End-user distribution still requires your Apple Developer signing identity and notarization credentials; no credentials are embedded.

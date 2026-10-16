@@ -709,6 +709,18 @@
       },
       "SettingsPatch": {
         "properties": {
+          "battery_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(passive|balanced|custom)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Battery Mode"
+          },
           "sampling_seconds": {
             "anyOf": [
               {

@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import time
 
 from bleak import BleakClient, BleakScanner
 
@@ -17,6 +19,8 @@ class StockSensorProvider:
         self.devices = {}
         self.advertisements = {}
         self.lock = asyncio.Lock()
+        self.connection_count = 0
+        self.last_connection = None
 
     async def discover(self):
         async with self.lock:
@@ -62,30 +66,41 @@ class StockSensorProvider:
                     device = await BleakScanner.find_device_by_address(identifier, timeout=8)
                 if device is None:
                     raise TimeoutError("Sensor is out of range")
-                async with BleakClient(device, timeout=12) as client:
-                    await on_status("Connected")
-                    characteristic = client.services.get_characteristic(CLIMATE_UUID)
-                    if not characteristic or "notify" not in characteristic.properties:
-                        raise UnsupportedDevice("Stock climate notification characteristic is unavailable")
-                    future = asyncio.get_running_loop().create_future()
+                started = time.monotonic()
+                self.connection_count += 1
+                interval = None if self.last_connection is None else started - self.last_connection
+                self.last_connection = started
+                try:
+                    async with BleakClient(device, timeout=12) as client:
+                        await on_status("Connected")
+                        characteristic = client.services.get_characteristic(CLIMATE_UUID)
+                        if not characteristic or "notify" not in characteristic.properties:
+                            raise UnsupportedDevice("Stock climate notification characteristic is unavailable")
+                        future = asyncio.get_running_loop().create_future()
 
-                    def notification(_, data):
-                        if future.done():
-                            return
-                        try:
-                            future.set_result(parse_notification(bytes(data)))
-                        except ValueError as exc:
-                            future.set_exception(exc)
+                        def notification(_, data):
+                            if future.done():
+                                return
+                            try:
+                                future.set_result(parse_notification(bytes(data)))
+                            except ValueError as exc:
+                                future.set_exception(exc)
 
-                    await client.start_notify(characteristic, notification)
-                    reading = await asyncio.wait_for(future, 15)
-                    battery = client.services.get_characteristic(BATTERY_UUID)
-                    if battery and "read" in battery.properties:
-                        try:
-                            raw = await asyncio.wait_for(client.read_gatt_char(battery), 3)
-                            if len(raw) == 1 and raw[0] <= 100:
-                                reading.battery_level = raw[0]
-                        except Exception:
-                            pass  # Battery is optional; preserve the valid climate reading.
-                    await client.stop_notify(characteristic)
-                    return reading
+                        await client.start_notify(characteristic, notification)
+                        reading = await asyncio.wait_for(future, 15)
+                        battery = client.services.get_characteristic(BATTERY_UUID)
+                        if battery and "read" in battery.properties:
+                            try:
+                                raw = await asyncio.wait_for(client.read_gatt_char(battery), 3)
+                                if len(raw) == 1 and raw[0] <= 100:
+                                    reading.battery_level = raw[0]
+                            except Exception:
+                                pass  # Battery is optional; preserve the valid climate reading.
+                        await client.stop_notify(characteristic)
+                        return reading
+                finally:
+                    logging.getLogger("thermonest").info("gatt_attempt", extra={
+                        "connection_count": self.connection_count,
+                        "duration_seconds": round(time.monotonic() - started, 3),
+                        "interval_seconds": None if interval is None else round(interval, 3),
+                    })

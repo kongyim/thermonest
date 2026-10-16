@@ -25,6 +25,7 @@ class SensorManager:
         self.adapter_status = "Demo mode" if provider.mock else "Ready to scan"
         self.advertisement_counters = {}
         self.last_saved = {}
+        self.passive_fields = {}
 
     async def call(self, method, *args, **kwargs):
         return await asyncio.to_thread(method, *args, **kwargs)
@@ -67,7 +68,7 @@ class SensorManager:
                     candidates = await self.provider.discover()
                 self.candidates = {c["device_identifier"]: c for c in candidates}
                 self.adapter_status = "Demo mode" if self.provider.mock else "Bluetooth available"
-                # Advertisements supplement GATT; missing fields remain missing.
+                # Advertisement processing never opens a connection.
                 if not self.provider.mock:
                     sensors = await self.call(self.db.sensors)
                     settings = await self.call(self.db.settings)
@@ -84,6 +85,10 @@ class SensorManager:
                             beacon = parse_mibeacon(payload, key)
                             if beacon and beacon.reading and self.advertisement_counters.get(sensor["id"]) != payload:
                                 self.advertisement_counters[sensor["id"]] = payload
+                                fields = self.passive_fields.setdefault(sensor["id"], {})
+                                for field in ("temperature_c", "humidity_percent"):
+                                    if getattr(beacon.reading, field) is not None:
+                                        fields[field] = time.monotonic()
                                 if (
                                     time.monotonic() - self.last_saved.get(sensor["id"], 0)
                                     >= settings["sampling_seconds"]
@@ -94,7 +99,7 @@ class SensorManager:
                                 await self.status(
                                     sensor["id"],
                                     "Bind key required",
-                                    "Passive advertisements need a key. Trying stock GATT automatically.",
+                                    "Advertisements need a bind key. Passive mode will not connect.",
                                 )
                         except Exception:
                             # No payload, bind key or crypto exception text reaches logs.
@@ -123,14 +128,28 @@ class SensorManager:
 
     async def worker(self, sensor_id):
         failures = 0
+        next_attempt = 0
         while self.running:
             sensor = await self.call(self.db.sensor, sensor_id)
             if not sensor:
                 return
             settings = await self.call(self.db.settings)
-            delay = settings["sampling_seconds"]
+            delay = 300 if settings["battery_mode"] == "balanced" else settings["sampling_seconds"]
+            fields = self.passive_fields.get(sensor_id, {})
+            passive_fresh = all(time.monotonic() - fields.get(field, float("-inf")) < delay * 2
+                                for field in ("temperature_c", "humidity_percent"))
+            cached_age = ((datetime.now(timezone.utc) - datetime.fromisoformat(sensor["last_seen"])).total_seconds()
+                          if sensor["last_seen"] else float("inf"))
+            if (settings["battery_mode"] == "passive" or passive_fresh
+                    or time.monotonic() < next_attempt or cached_age < delay):
+                await asyncio.sleep(1)
+                continue
             try:
                 async with self.semaphore:
+                    # A queued worker must respect a mode change before connecting.
+                    current = await self.call(self.db.settings)
+                    if current != settings:
+                        continue
                     await self.status(sensor_id, "Connecting")
                     reading = await self.provider.read(sensor["device_identifier"], lambda s: self.status(sensor_id, s))
                     await self.save(sensor_id, reading)
@@ -148,14 +167,21 @@ class SensorManager:
                 }
                 await self.status(sensor_id, status, errors[status])
                 log.info("sensor_read_failed", extra={"sensor_id": sensor_id, "state": status})
-                delay = min(900, 5 * 2 ** min(failures, 8)) + random.uniform(0, 3)
-            await asyncio.sleep(delay)
+                delay = min(86400, delay * 2 ** min(failures, 8)) + random.uniform(0, 3)
+            next_attempt = time.monotonic() + delay
+            await asyncio.sleep(1)
 
     async def run(self):
-        next_scan = time.monotonic() + 60
+        next_scan = 0
         while self.running:
             sensors = await self.call(self.db.sensors)
             settings = await self.call(self.db.settings)
+            if sensors and time.monotonic() >= next_scan:
+                try:
+                    await self.discover()
+                except Exception:
+                    pass
+                next_scan = time.monotonic() + 60
             for sensor in sensors:
                 sid = sensor["id"]
                 if sid not in self.tasks or self.tasks[sid].done():
@@ -164,10 +190,4 @@ class SensorManager:
                     age = (datetime.now(timezone.utc) - datetime.fromisoformat(sensor["last_seen"])).total_seconds()
                     if age > max(180, settings["sampling_seconds"] * 3):
                         await self.status(sid, "Stale")
-            if sensors and time.monotonic() >= next_scan:
-                try:
-                    await self.discover()
-                except Exception:
-                    pass
-                next_scan = time.monotonic() + 60
             await asyncio.sleep(1)

@@ -96,3 +96,15 @@ def test_sqlite_migration_restart_and_missing_values(tmp_path):
     assert db.sensor(sensor["id"])["humidity_percent"] == 45
     assert db.rows("SELECT * FROM migrations") == [{"version": 1}, {"version": 2}]
     db.engine.dispose()
+
+
+def test_battery_settings(client):
+    login(client)
+    settings = client.get("/api/settings").json()
+    assert settings["sampling_seconds"] == 300
+    assert settings["battery_mode"] == "balanced"
+    assert client.patch("/api/settings", json={"battery_mode": "invalid"}).status_code == 422
+    assert client.patch("/api/settings", json={"sampling_seconds": 600}).json()["battery_mode"] == "custom"
+    settings = client.patch("/api/settings", json={"battery_mode": "balanced"}).json()
+    assert settings["sampling_seconds"] == 300
+    assert client.patch("/api/settings", json={"battery_mode": "passive"}).json()["battery_mode"] == "passive"

@@ -419,7 +419,7 @@ function App() {
           {page === "Floor plan" ? (
             <FloorPlanView
               sensors={items}
-              sampling={settings.data?.sampling_seconds ?? 120}
+              sampling={settings.data?.sampling_seconds ?? 300}
               notify={setMessage}
             />
           ) : page === "Settings" ? (
@@ -526,7 +526,7 @@ function App() {
                           key={sensor.id}
                           sensor={sensor}
                           color={colors[i % colors.length]}
-                          sampling={settings.data?.sampling_seconds ?? 120}
+                          sampling={settings.data?.sampling_seconds ?? 300}
                           onClick={() => {
                             setSelected(sensor.id);
                             if (page === "Sensors") setEdit(sensor);
@@ -922,7 +922,7 @@ function SensorCard({
         </span>
       </div>
       <div className="card-seen">
-        <span>{ago(sensor.last_seen)}</span>
+        <span title={sensor.last_seen ? new Date(sensor.last_seen).toLocaleString() : undefined}>{ago(sensor.last_seen)}</span>
         <span title="Signal strength from last scan">
           <Signal size={11} />
           {sensor.rssi == null ? "—" : `${sensor.rssi} dBm`}
@@ -1439,12 +1439,26 @@ function SettingsPanel({
       </div>
       <div className="setting-row">
         <div>
+          <h3>Battery Saver</h3>
+          <p>Passive uses advertisements only. Balanced allows a brief GATT read every 5 minutes when needed. Custom uses your interval.</p>
+          <p>On macOS, Passive means no connections; the system controls radio scanning. Encrypted advertisements may need a bind key.</p>
+        </div>
+        <select aria-label="Battery Saver" value={settings?.battery_mode ?? "balanced"}
+          onChange={(e) => save({ battery_mode: e.target.value as Settings["battery_mode"] })}>
+          <option value="passive">Passive</option>
+          <option value="balanced">Balanced</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div className="setting-row">
+        <div>
           <h3>Sampling frequency</h3>
-          <p>Less frequent connections can help sensor battery life.</p>
+          <p>Sensor polling is independent of dashboard refresh. Changing this selects Custom mode.</p>
         </div>
         <select
           aria-label="Sampling frequency"
-          value={settings?.sampling_seconds ?? 120}
+          disabled={settings?.battery_mode === "passive"}
+          value={settings?.sampling_seconds ?? 300}
           onChange={(e) => save({ sampling_seconds: Number(e.target.value) })}
         >
           {[30, 60, 120, 300, 600, 1800, 3600].map((s) => (
