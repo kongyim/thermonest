@@ -1,0 +1,155 @@
+@media (min-width: 1450px) {
+  main {
+    padding: 42px 48px 0;
+  }
+  .sensor-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .sensor-card {
+    padding: 22px;
+  }
+  .stats-grid {
+    padding: 25px 0;
+  }
+  .stat-value {
+    font-size: 40px;
+  }
+  .page-heading {
+    margin-bottom: 35px;
+  }
+  h1 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 205px;
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+  .brand {
+    font-size: 19px;
+  }
+  .main-shell {
+    margin-left: 205px;
+  }
+  main {
+    padding: 28px 25px 0;
+  }
+  .topbar {
+    padding: 0 25px;
+  }
+  .stat {
+    padding: 0 17px;
+  }
+  .history-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .history-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .sensor-grid {
+    gap: 12px;
+  }
+  .sensor-card {
+    padding: 16px;
+  }
+  .climate-value {
+    font-size: 34px;
+  }
+  .stat-value > .pill {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  .sidebar {
+    width: 70px;
+    padding: 25px 10px;
+  }
+  .brand {
+    padding: 0;
+    justify-content: center;
+  }
+  .brand > span,
+  .home-switch,
+  .nav-caption,
+  .nav-item > span,
+  .nav-empty,
+  .sidebar-bottom,
+  .sidebar nav:nth-of-type(2) {
+    display: none;
+  }
+  .sidebar nav {
+    margin-top: 35px;
+  }
+  .nav-item {
+    font-size: 0;
+    justify-content: center;
+    padding: 13px;
+  }
+  .brand-icon {
+    width: 38px;
+  }
+  .main-shell {
+    margin-left: 70px;
+  }
+  .topbar {
+    height: 55px;
+  }
+  main {
+    padding: 25px 20px 0;
+  }
+  h1 {
+    font-size: 25px;
+  }
+  .stat {
+    padding: 0 12px;
+  }
+  .stat-label {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .stat-foot {
+    font-size: 8px;
+  }
+  .stat-value {
+    font-size: 28px;
+  }
+  .sensor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .page-heading .button {
+    font-size: 0;
+    gap: 0;
+    padding: 10px;
+  }
+  .history-actions {
+    flex-wrap: wrap;
+  }
+  .main-footer > span:last-child,
+  .updated {
+    display: none;
+  }
+  .toast {
+    left: 50%;
+    width: 80%;
+  }
+  .demo-banner span {
+    display: none;
+  }
+  .setting-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

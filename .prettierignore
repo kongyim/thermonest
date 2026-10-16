@@ -1,0 +1,17 @@
+.git/
+.venv/
+.dev-data/
+node_modules/
+**/node_modules/
+**/__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+frontend/dist/
+**/test-results/
+**/playwright-report/
+**/package-lock.json
+**/*.tsbuildinfo
+docs/openapi.json

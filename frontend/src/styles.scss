@@ -1,0 +1,12 @@
+// Module order preserves the existing cascade. Keep this order when adding styles.
+@use "styles/base";
+@use "styles/layout";
+@use "styles/buttons";
+@use "styles/dashboard";
+@use "styles/history";
+@use "styles/dialogs";
+@use "styles/settings";
+@use "styles/feedback";
+@use "styles/theme";
+@use "styles/responsive";
+@use "styles/comparison";

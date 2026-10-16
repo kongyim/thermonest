@@ -6,6 +6,8 @@
     "dev:api": ".venv/bin/python -m scripts.dev_api",
     "dev:web": "npm --prefix frontend run dev -- --port 5173 --strictPort",
     "build:macos": "bash scripts/build-macos.sh",
-    "build": "npm run build:macos"
+    "build": "npm run build:macos",
+    "format": "node frontend/node_modules/prettier/bin/prettier.cjs --write . --ignore-unknown",
+    "format:check": "node frontend/node_modules/prettier/bin/prettier.cjs --check . --ignore-unknown"
   }
 }

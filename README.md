@@ -76,3 +76,39 @@ npm run build
 ```
 
 The PyInstaller spec includes Cocoa/WebKit, CoreBluetooth, the Keychain backend, and the compiled UI. Native Bluetooth permission usage strings are embedded in Info.plist. The Python and npm dependency locks are included. End-user distribution still requires your Apple Developer signing identity and notarization credentials; no credentials are embedded.
+
+## Formatting
+
+Prettier is installed with the frontend dependencies (`npm --prefix frontend ci`).
+Open the repository root in VS Code or Cursor and install the recommended
+**Prettier – Code formatter** extension (`esbenp.prettier-vscode`). Supported web,
+JSON, YAML, and Markdown files will format automatically on save using the shared
+`.prettierrc.json`. Python files are not formatted by Prettier.
+
+From the repository root:
+
+```sh
+npm run format        # Format supported project files
+npm run format:check  # Check formatting without changing files
+```
+
+Generated files, dependencies, build output, and local databases are excluded.
+
+### SCSS conventions
+
+Styles use Dart Sass, compiled by Vite. `frontend/src/styles.scss` loads focused
+partials from `frontend/src/styles/` using `@use`; floor-plan styles live beside
+that component in `frontend/src/components/floor-plan.scss`.
+
+- Use `@use` instead of legacy Sass `@import`.
+- Keep nesting shallow (at most three levels); use `&` for states and modifiers.
+- Keep existing kebab-case class names. Avoid IDs and `!important` overrides.
+- Use the existing CSS custom properties for theme colours so runtime theme
+  switching keeps working. Add Sass variables/mixins only for shared build-time
+  values or genuinely repeated patterns.
+- Preserve module order: it controls the cascade. Keep responsive overrides in
+  `_responsive.scss`; component-specific media queries stay with the component.
+- Prettier formats SCSS on save with the recommended editor extension.
+
+After pulling dependency changes, run `npm --prefix frontend ci` and restart
+`npm run dev:web`. The existing web and macOS build commands compile SCSS.

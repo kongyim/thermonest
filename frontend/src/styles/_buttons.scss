@@ -1,0 +1,29 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.button-primary {
+  background: #527762;
+  color: white;
+  box-shadow: 0 2px 3px #24463110;
+  &:hover {
+    background: #436650;
+  }
+}
+.button-outline {
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.button-outline:hover,
+.button-ghost:hover {
+  background: var(--hover);
+}

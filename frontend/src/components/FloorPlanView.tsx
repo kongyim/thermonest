@@ -31,7 +31,7 @@ import {
 } from "../floor-plan";
 import { Button } from "./ui/button";
 import { Dialog } from "./ui/dialog";
-import "./floor-plan.css";
+import "./floor-plan.scss";
 
 // Display preferences belong to this browser, independently of sensor polling.
 function useMapPreference<T>(key: string, fallback: T, valid: (value: unknown) => boolean) {

@@ -1,0 +1,25 @@
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #171d1b;
+  --sidebar: #1c2320;
+  --card: #202824;
+  --text: #d6e0d8;
+  --muted: #8a9c91;
+  --line: #303b34;
+  --soft: #2b3b30;
+  --hover: #29322c;
+  background: var(--bg);
+  color: var(--text);
+}
+[data-theme="dark"] .demo-banner {
+  background: #322e23;
+  border-color: #4c4430;
+  color: #bead7b;
+}
+[data-theme="dark"] .nav-item.active {
+  color: #adbfad;
+}
+[data-theme="dark"] .form-error {
+  background: #392b25;
+  color: #d8a18d;
+}

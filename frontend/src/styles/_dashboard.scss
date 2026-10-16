@@ -1,0 +1,240 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  padding: 21px 0;
+}
+.stat {
+  padding: 0 25px;
+  border-right: 1px solid var(--line);
+  &:last-child {
+    border: 0;
+  }
+}
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7d8783;
+  font-size: 10px;
+  svg {
+    color: #92a296;
+  }
+}
+.stat-value {
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -1.3px;
+  font-weight: 500;
+  margin: 14px 0 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  > span {
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: #9aaba1;
+  }
+  > .stat-of {
+    font-size: 18px;
+    color: #b3bab6;
+    margin-left: 3px;
+  }
+  > .pill {
+    margin-left: auto;
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+}
+.stat-foot {
+  font-size: 9px;
+  color: #9aa19c;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pill {
+  padding: 5px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  &.green {
+    color: #7a9380;
+    background: var(--soft);
+  }
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 29px 0 17px;
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+h2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.section-heading p,
+.history-heading p {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.count-badge {
+  font-size: 9px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 2px 5px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.updated {
+  font-size: 9px;
+  color: #9aa29e;
+}
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+.sensor-card {
+  padding: 19px 20px 13px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-width: 0;
+  transition: border-color 0.2s;
+  &.chosen {
+    border-color: #bdcfc1;
+  }
+  &:hover {
+    border-color: #b1c8b9;
+  }
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+.room-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  color: var(--accent);
+}
+.sensor-options {
+  font-size: 19px;
+  letter-spacing: 2px;
+  color: #9da59f;
+  padding: 0 0 10px 10px;
+}
+.sensor-main {
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+.sensor-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.sensor-name {
+  font-size: 9px;
+  color: #99a09c;
+}
+.climate-value {
+  font-size: 39px;
+  font-weight: 400;
+  letter-spacing: -1.7px;
+  line-height: 1.2;
+  margin-top: 14px;
+  > span {
+    font-size: 23px;
+    vertical-align: top;
+    display: inline-block;
+    margin: 5px 0 0 3px;
+    color: #acb4ad;
+    font-weight: 300;
+  }
+}
+.humidity {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #75867d;
+  margin-top: 7px;
+  svg {
+    color: #91a9b1;
+  }
+  > span {
+    font-size: 9px;
+    color: #9ba69f;
+  }
+}
+.sparkline {
+  margin: 13px -4px 4px;
+  height: 40px;
+  > span {
+    font-size: 9px;
+    color: #b1b8b2;
+    display: block;
+    padding-top: 14px;
+  }
+}
+.card-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  border-top: 1px solid var(--line);
+  padding-top: 11px;
+  margin-top: 4px;
+}
+.status-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #9ba39b;
+  &.fresh {
+    color: #76917a;
+  }
+}
+.battery {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #97a194;
+}
+.card-seen {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 8px;
+  color: #a4ada6;
+  > span:last-child {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+}
+.sensor-error {
+  font-size: 9px;
+  color: #a17b5f;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.not-fresh .climate-value {
+  color: #a2aaa3;
+}

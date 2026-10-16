@@ -1,0 +1,65 @@
+.settings-panel {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 10px;
+  padding: 0 25px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 0;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  &:last-child {
+    border: 0;
+  }
+  h3 {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  p {
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-top: 7px;
+  }
+  > svg {
+    color: #91a88c;
+  }
+  > .pill {
+    font-size: 10px;
+  }
+}
+.custom-range {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  label {
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  input {
+    font-size: 10px;
+  }
+  small {
+    font-size: 10px;
+    color: #ae8962;
+  }
+}
+.help-copy {
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin-top: 22px;
+  h3 {
+    font-size: 13px;
+    color: var(--text);
+    margin: 20px 0 6px;
+  }
+}

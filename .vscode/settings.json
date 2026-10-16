@@ -1,0 +1,8 @@
+{
+  "prettier.prettierPath": "./frontend/node_modules/prettier",
+  "prettier.requireConfig": true,
+  "[javascript][javascriptreact][typescript][typescriptreact][json][jsonc][css][scss][html][markdown][yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  }
+}

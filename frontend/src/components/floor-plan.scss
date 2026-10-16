@@ -4,14 +4,14 @@
 .floor-empty {
   padding: 48px 20px;
   gap: 18px;
-}
-.floor-empty h2 {
-  font-size: 24px;
-  font-weight: 500;
-  letter-spacing: -0.6px;
-}
-.floor-empty .eyebrow {
-  margin: 4px 0 0;
+  h2 {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.6px;
+  }
+  .eyebrow {
+    margin: 4px 0 0;
+  }
 }
 .floor-empty-art {
   display: grid;
@@ -24,20 +24,20 @@
   border: 2px solid #9db0a2;
   border-radius: 6px;
   margin-bottom: 10px;
-}
-.floor-empty-art > div {
-  background: var(--soft);
-  border: 1px solid #b3c2b7;
-  border-radius: 2px;
-}
-.floor-empty-art > div:first-child {
-  grid-row: span 2;
-}
-.floor-empty-art svg {
-  position: absolute;
-  top: 40px;
-  left: 35px;
-  color: var(--green);
+  > div {
+    background: var(--soft);
+    border: 1px solid #b3c2b7;
+    border-radius: 2px;
+  }
+  > div:first-child {
+    grid-row: span 2;
+  }
+  svg {
+    position: absolute;
+    top: 40px;
+    left: 35px;
+    color: var(--green);
+  }
 }
 .floor-steps {
   display: flex;
@@ -45,21 +45,21 @@
   margin-top: 16px;
   color: var(--muted);
   font-size: 11px;
-}
-.floor-steps > span {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.floor-steps > span > span {
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  background: var(--soft);
-  border-radius: 50%;
-  color: var(--green);
-  font-size: 10px;
+  > span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  > span > span {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    background: var(--soft);
+    border-radius: 50%;
+    color: var(--green);
+    font-size: 10px;
+  }
 }
 .map-toolbar {
   display: flex;
@@ -111,15 +111,15 @@
   user-select: none;
   background: #fff;
   line-height: 0;
-}
-.map-surface > img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  object-fit: fill;
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    object-fit: fill;
+  }
 }
 .temperature-overlay,
 .map-reference {
@@ -148,9 +148,9 @@
   line-height: 1.2;
   text-align: center;
   filter: drop-shadow(0 2px 4px #0002);
-}
-.map-pin:active {
-  cursor: grabbing;
+  &:active {
+    cursor: grabbing;
+  }
 }
 .pin-dot {
   height: 27px;
@@ -177,17 +177,17 @@
   gap: 3px;
   min-width: 65px;
   max-width: 130px;
-}
-.pin-label strong {
-  font-size: 9px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.pin-label > span {
-  font-size: 12px;
-  font-weight: 650;
+  strong {
+    font-size: 9px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  > span {
+    font-size: 12px;
+    font-weight: 650;
+  }
 }
 .stale .pin-label > span {
   font-size: 8px;
@@ -208,16 +208,16 @@
   align-items: center;
   gap: 7px;
   color: #6c8877;
-}
-.map-panel-heading h3 {
-  font-size: 12px;
-  font-weight: 550;
-  color: var(--text);
-}
-.map-panel-heading > span {
-  font-size: 9px;
-  color: var(--muted);
-  margin-left: auto;
+  h3 {
+    font-size: 12px;
+    font-weight: 550;
+    color: var(--text);
+  }
+  > span {
+    font-size: 9px;
+    color: var(--muted);
+    margin-left: auto;
+  }
 }
 .map-panel-help {
   font-size: 10px;
@@ -231,22 +231,22 @@
   gap: 5px;
   max-height: 320px;
   overflow: auto;
-}
-.map-sensor-list > button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  text-align: left;
-  padding: 10px 7px;
-  border: 1px solid transparent;
-  border-radius: 7px;
-}
-.map-sensor-list > button:hover {
-  background: var(--hover);
-}
-.map-sensor-list > button.active {
-  background: var(--soft);
-  border-color: var(--line);
+  > button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    text-align: left;
+    padding: 10px 7px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+  }
+  > button:hover {
+    background: var(--hover);
+  }
+  > button.active {
+    background: var(--soft);
+    border-color: var(--line);
+  }
 }
 .map-sensor-dot {
   width: 7px;
@@ -276,49 +276,49 @@
   margin-top: 12px;
   padding: 13px 7px 0;
   border-top: 1px solid var(--line);
-}
-.map-selected strong {
-  font-weight: 500;
-}
-.map-selected p {
-  color: var(--muted);
-  font-size: 9px;
-  margin-top: 5px;
-}
-.map-selected .button {
-  padding: 8px 0;
-  font-size: 9px;
+  strong {
+    font-weight: 500;
+  }
+  p {
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 5px;
+  }
+  .button {
+    padding: 8px 0;
+    font-size: 9px;
+  }
 }
 .map-overlay-settings {
   border-top: 1px solid var(--line);
   margin-top: 20px;
   padding-top: 18px;
-}
-.map-overlay-settings label {
-  font-size: 10px;
-  color: var(--muted);
-  display: block;
-  margin-top: 20px;
-}
-.map-overlay-settings label > span {
-  float: right;
-  color: var(--text);
-  font-size: 9px;
-}
-.map-overlay-settings input[type="range"] {
-  padding: 0;
-  margin-top: 10px;
-  accent-color: #63846e;
-  width: 100%;
-  height: 4px;
-  display: block;
-  cursor: pointer;
-}
-.map-overlay-settings .map-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
+  label {
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-top: 20px;
+  }
+  label > span {
+    float: right;
+    color: var(--text);
+    font-size: 9px;
+  }
+  input[type="range"] {
+    padding: 0;
+    margin-top: 10px;
+    accent-color: #63846e;
+    width: 100%;
+    height: 4px;
+    display: block;
+    cursor: pointer;
+  }
+  .map-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
 }
 .map-toggle input {
   width: 14px;
@@ -362,10 +362,10 @@
   gap: 12px;
   color: var(--muted);
   font-size: 10px;
-}
-.map-zoom button {
-  display: flex;
-  padding: 2px;
+  button {
+    display: flex;
+    padding: 2px;
+  }
 }
 .map-size {
   font-size: 9px;
@@ -380,15 +380,15 @@
   margin: 5px 0 24px 0;
   max-width: 80%;
   min-width: 8px;
-}
-.map-scale span {
-  position: absolute;
-  top: 11px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 8px;
-  color: var(--muted);
-  white-space: nowrap;
+  span {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
 }
 .map-legend {
   border-top: 1px solid var(--line);
@@ -399,11 +399,11 @@
   font-size: 9px;
   color: var(--muted);
   flex-wrap: wrap;
-}
-.map-legend > div {
-  flex: 1;
-  min-width: 120px;
-  max-width: 260px;
+  > div {
+    flex: 1;
+    min-width: 120px;
+    max-width: 260px;
+  }
 }
 .temperature-gradient {
   height: 6px;
@@ -434,24 +434,24 @@
   border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
   background: var(--soft);
-}
-.calibration-form label {
-  font-size: 10px;
-  color: var(--muted);
-  width: 130px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.calibration-form select {
-  font-size: 10px;
-  height: 36px;
-}
-.calibration-form small {
-  width: 100%;
-  font-size: 9px;
-  color: var(--muted);
-  line-height: 1.6;
+  label {
+    font-size: 10px;
+    color: var(--muted);
+    width: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  select {
+    font-size: 10px;
+    height: 36px;
+  }
+  small {
+    width: 100%;
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
 }
 .map-pin:focus-visible {
   outline: 2px solid #344bce;
