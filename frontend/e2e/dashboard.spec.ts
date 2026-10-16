@@ -43,6 +43,25 @@ test("local onboarding, live readings, history, settings and removal", async ({
   expect((await downloadPromise).suggestedFilename()).toBe(
     "thermonest-readings.csv",
   );
+  // Compare a second location without changing the primary CSV selection.
+  const response = await page.request.post("/api/sensors", {
+    headers: { "X-ThermoNest": "1" },
+    data: { device_identifier: "demo-1", display_name: "Bedroom sensor" },
+  });
+  expect(response.ok()).toBeTruthy();
+  const comparison = await response.json();
+  await page.getByRole("group", { name: "Compare locations" })
+    .getByLabel("Bedroom sensor").check();
+  await expect(page.locator(".chart .recharts-line")).toHaveCount(2);
+  await expect(page.locator(".chart .recharts-legend-wrapper")).toContainText("Bedroom sensor");
+  await page.getByRole("button", { name: "Temperature", exact: true }).click();
+  await expect(page.locator(".chart .recharts-line")).toHaveCount(2);
+  await page.getByRole("group", { name: "Compare locations" })
+    .getByLabel("Bedroom sensor").uncheck();
+  await expect(page.locator(".chart .recharts-line")).toHaveCount(1);
+  await page.request.delete(`/api/sensors/${comparison.id}`, {
+    headers: { "X-ThermoNest": "1" },
+  });
   await page.screenshot({ path: "../docs/dashboard.png", fullPage: true });
   await exerciseFloorPlan(page);
   await page.getByRole("button", { name: "Settings", exact: true }).click();

@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Area,
   AreaChart,
   CartesianGrid,
+  Line,
+  LineChart,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -78,6 +81,7 @@ function App() {
   const [wizard, setWizard] = useState(false);
   const [edit, setEdit] = useState<Sensor | null>(null);
   const [selected, setSelected] = useState("");
+  const [compareIds, setCompareIds] = useState<string[]>([]);
   const [range, setRange] = useState("24h");
   const [metric, setMetric] = useState<"temperature_c" | "humidity_percent">(
     "temperature_c",
@@ -112,7 +116,10 @@ function App() {
     refetchInterval: 10000,
   });
   const items = sensors.data ?? [];
-  const active = selected || items[0]?.id;
+  const active = items.some((sensor) => sensor.id === selected) ? selected : items[0]?.id;
+  useEffect(() => {
+    if (active && active !== selected) setSelected(active);
+  }, [active, selected]);
   const selectedSensor = items.find((s) => s.id === active);
   const rangeError =
     range === "custom" &&
@@ -135,12 +142,42 @@ function App() {
         : ""
       : new Date().toISOString();
   const params = `start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`;
+  function historyParams() {
+    if (range === "custom") return params;
+    const now = Date.now();
+    const days = ({ "24h": 1, "7d": 7, "30d": 30 }[range] ?? 1);
+    return new URLSearchParams({
+      start: new Date(now - days * 86400000).toISOString(),
+      end: new Date(now).toISOString(),
+    }).toString();
+  }
   const history = useQuery({
     queryKey: ["history", active, range, customStart, customEnd],
-    queryFn: () => api<Reading[]>(`/sensors/${active}/readings?${params}`),
+    queryFn: () => api<Reading[]>(`/sensors/${active}/readings?${historyParams()}`),
     enabled: !!active && !rangeError,
     refetchInterval: 30000,
   });
+  const comparisonSensors = items.filter((sensor) => sensor.id !== active && compareIds.includes(sensor.id));
+  const comparisons = useQueries({
+    queries: comparisonSensors.map((sensor) => ({
+      queryKey: ["history", sensor.id, range, customStart, customEnd],
+      queryFn: () => api<Reading[]>(`/sensors/${sensor.id}/readings?${historyParams()}`),
+      enabled: !rangeError && (page === "History" || page === "Overview"),
+      refetchInterval: 30000,
+    })),
+  });
+  const chartSeries = selectedSensor ? [selectedSensor, ...comparisonSensors].map((sensor, index) => {
+    const query = index === 0 ? history : comparisons[index - 1];
+    return {
+      sensor,
+      name: sensor.room_name ? `${sensor.room_name} · ${sensor.display_name}` : sensor.display_name,
+      color: `hsl(${(items.findIndex((item) => item.id === sensor.id) * 137.508 + 150) % 360}, 48%, 46%)`,
+      data: (query.data ?? []).map((reading) => ({ ...reading, time: Date.parse(reading.timestamp) })),
+      error: query.error,
+      loading: query.isFetching,
+    };
+  }) : [];
+  const chartData = chartSeries.flatMap((series) => series.data).sort((a, b) => a.time - b.time);
   useEffect(() => {
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -579,6 +616,7 @@ function App() {
                       <Button
                         variant="outline"
                         aria-label="Export history as CSV"
+                        title="Export the primary sensor selected above"
                         disabled={!active || !!rangeError}
                         onClick={exportCsv}
                       >
@@ -586,6 +624,25 @@ function App() {
                       </Button>
                     </div>
                   </div>
+                  {items.length > 1 && (
+                    <fieldset className="history-comparison">
+                      <legend>Compare locations</legend>
+                      {items.map((sensor) => (
+                        <label key={sensor.id}>
+                          <input type="checkbox"
+                            checked={sensor.id === active || compareIds.includes(sensor.id)}
+                            disabled={sensor.id === active}
+                            onChange={(e) => setCompareIds((ids) => e.target.checked
+                              ? [...ids, sensor.id] : ids.filter((id) => id !== sensor.id))} />
+                          {sensor.room_name ? `${sensor.room_name} · ${sensor.display_name}` : sensor.display_name}
+                        </label>
+                      ))}
+                      <small>The sensor selected above is always included. CSV exports that sensor.</small>
+                    </fieldset>
+                  )}
+                  {chartSeries.filter((series) => series.error).map((series) => (
+                    <p role="alert" key={series.sensor.id}>{series.name}: {series.error?.message}</p>
+                  ))}
                   <div className="chart-toolbar">
                     <div className="metric-tabs">
                       <button
@@ -636,50 +693,23 @@ function App() {
                       )}
                     </div>
                   )}
-                  {history.error ? (
-                    <div className="chart-empty">{history.error.message}</div>
-                  ) : history.data?.length && !rangeError ? (
+                  {chartData.length > 0 && !rangeError ? (
                     <div className="chart">
                       <ResponsiveContainer width="100%" height={245}>
-                        <AreaChart
-                          data={history.data}
+                        <LineChart
+                          data={chartData}
                           margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
                         >
-                          <defs>
-                            <linearGradient
-                              id="chartFill"
-                              x1="0"
-                              y1="0"
-                              x2="0"
-                              y2="1"
-                            >
-                              <stop
-                                offset="0%"
-                                stopColor={
-                                  metric === "temperature_c"
-                                    ? "#6b9283"
-                                    : "#73a2bc"
-                                }
-                                stopOpacity={0.22}
-                              />
-                              <stop
-                                offset="100%"
-                                stopColor={
-                                  metric === "temperature_c"
-                                    ? "#6b9283"
-                                    : "#73a2bc"
-                                }
-                                stopOpacity={0.01}
-                              />
-                            </linearGradient>
-                          </defs>
                           <CartesianGrid
                             vertical={false}
                             stroke="var(--line)"
                             strokeDasharray="3 5"
                           />
                           <XAxis
-                            dataKey="timestamp"
+                            dataKey="time"
+                            type="number"
+                            scale="time"
+                            domain={["dataMin", "dataMax"]}
                             tickFormatter={(v) =>
                               new Date(v).toLocaleString(
                                 undefined,
@@ -707,11 +737,9 @@ function App() {
                           />
                           <Tooltip
                             labelFormatter={(v) => new Date(v).toLocaleString()}
-                            formatter={(v: number) => [
+                            formatter={(v: number, name) => [
                               `${number(v)}${metric === "temperature_c" ? " °C" : "%"}`,
-                              metric === "temperature_c"
-                                ? "Temperature"
-                                : "Humidity",
+                              name,
                             ]}
                             contentStyle={{
                               background: "var(--card)",
@@ -720,25 +748,28 @@ function App() {
                               fontSize: 12,
                             }}
                           />
-                          <Area
-                            type="monotone"
-                            dataKey={metric}
-                            stroke={
-                              metric === "temperature_c" ? "#648e7c" : "#73a2bc"
-                            }
-                            strokeWidth={2.5}
-                            fill="url(#chartFill)"
-                            connectNulls={false}
-                            isAnimationActive={false}
-                          />
-                        </AreaChart>
+                          <Legend />
+                          {chartSeries.map((series) => (
+                            <Line key={series.sensor.id}
+                              name={series.name}
+                              data={series.data}
+                              type="linear"
+                              dataKey={metric}
+                              stroke={series.color}
+                              strokeWidth={2.5}
+                              dot={series.data.length === 1}
+                              connectNulls={false}
+                              isAnimationActive={false}
+                            />
+                          ))}
+                        </LineChart>
                       </ResponsiveContainer>
                     </div>
                   ) : (
                     <div className="chart-empty">
                       <Activity size={27} />
                       <strong>
-                        {history.isFetching
+                        {chartSeries.some((series) => series.loading)
                           ? "Loading history…"
                           : "A story worth waiting for."}
                       </strong>
@@ -754,7 +785,7 @@ function App() {
                       <span className="dot" />
                       Stored on this Mac · Times shown in your timezone
                     </span>
-                    <span>{history.data?.length ?? 0} chart points</span>
+                    <span>{chartData.length} chart points</span>
                   </div>
                 </section>
               )}
